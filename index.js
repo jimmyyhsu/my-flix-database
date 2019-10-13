@@ -138,7 +138,7 @@ app.post('/users/:Username/Movies/:MovieID', passport.authenticate('jwt', {sessi
     { Username : req.params.Username }, 
     { $push : { FavoriteMovies : req.params.MovieID } },
     { new : true }, // This line makes sure that the updated document is returned
-    (err, updatedUser) => {
+    (error, updatedUser) => {
       if (error) {
         console.error(error);
         res.status(500).send("Error: " + error);
