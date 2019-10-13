@@ -1,13 +1,15 @@
 const express = require('express'),
   morgan = require('morgan'),
   bodyParser = require('body-parser'),
-  uuid = require('uuid'),
   mongoose = require('mongoose'),
   Models = require('./models.js'),
   app = express();
 
 const Movies = Models.Movie;
 const Users = Models.User;
+
+const passport = require('passport');
+require('./passport');  
 
 mongoose.connect('mongodb://localhost:27017/myFlixDB', { useNewUrlParser: true, useUnifiedTopology: true })
 
@@ -19,16 +21,18 @@ app.use(morgan('common'));
 
 app.use(bodyParser.json());
 
+var auth = require('./auth')(app);
+
 // Gets the list of data about ALL movies
 
-app.get('/movies', function(req, res) {
-    Movies.find()
-    .then(function(movies) {
-        res.status(201).json(movies)
-    })
-    .catch(function(err) {
-        console.error(err);
-        res.status(500).send("Error: " + err);
+app.get('/movies', passport.authenticate('jwt', {session : false}),
+ function(req, res) {
+   Movies.find()
+   .then(function(movies) {
+     res.status(201).json(movies);
+    }).catch(function(error) {
+      console.error(error);
+      res.status(500).send("Error: " + error);
     });
 });
 
@@ -39,8 +43,8 @@ app.get('/movies/:Title', function(req, res) {
     .then(function(movie) {
       res.json(movie)
     })
-    .catch(function(err) {
-      console.error(err);
+    .catch(function(error) {
+      console.error(error);
       res.status(500).send("Error: " + err);
     });
   });
@@ -105,7 +109,10 @@ app.post('/users', function(req, res) {
 // Update the user's information
 
 app.put('/users/:Username', function(req, res) {
-    Users.update({ Username : req.params.Username }, 
+    Users.update(
+      { 
+        Username : req.params.Username 
+      }, 
       { 
         $set : {
             Username : req.body.Username,
@@ -122,7 +129,7 @@ app.put('/users/:Username', function(req, res) {
         } else {
           res.json(updatedUser)
         }
-      })                    
+      })
     });
 
 // Add a movie to a user's list of favorites
@@ -176,11 +183,6 @@ app.delete('/users/:Username', function(req, res) {
 });
 
 app.use(express.static('public'));
-
-//app.use(function(err, req, res, next) {
-    //console.error(err.stack);
-    //res.status(500).send('Something broke!');
-//});
 
 // Listen for requests on port 8080
 
