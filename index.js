@@ -1,27 +1,35 @@
-const express = require('express'),
-  morgan = require('morgan'),
-  bodyParser = require('body-parser'),
-  mongoose = require('mongoose'),
-  Models = require('./models.js'),
-  app = express();
+const express = require('express');
+const app = express();
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const Models = require('./models.js');
 
 const Movies = Models.Movie;
 const Users = Models.User;
-
+const cors = require('cors');
+const { check, validationResult } = require('express-validator');
 const passport = require('passport');
 require('./passport');  
 
 mongoose.connect('mongodb://localhost:27017/myFlixDB', { useNewUrlParser: true, useUnifiedTopology: true })
 
-// Logging with Morgan
+// Middleware functions
+app.use(express.static('public'));
+app.use(morgan('common')); // Logging with Morgan
+app.use(bodyParser.json()); // Using bodyParser
+app.use(cors()); // Using cors
 
-app.use(morgan('common'));
-
-// Using bodyParser
-
-app.use(bodyParser.json());
 
 var auth = require('./auth')(app);
+
+//Error handling middleware functions
+
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+  next();
+});
 
 // Gets the list of data about ALL movies
 
@@ -66,7 +74,7 @@ app.get('/movies/genres/:Name', passport.authenticate('jwt', { session : false }
 
 // Get data about a director
 
-app.get("/movies/directors/:Name", passport.authenticate('jwt', { session : false }),
+app.get('/movies/directors/:Name', passport.authenticate('jwt', { session : false }),
 (req, res) => {
   Movies.findOne({
     'Director.Name' : req.params.Name 
@@ -82,7 +90,18 @@ app.get("/movies/directors/:Name", passport.authenticate('jwt', { session : fals
 
 // Add a user
 
-app.post('/users', passport.authenticate('jwt', {session : false}), (req, res) => {
+app.post('/users', [
+  check('Username', 'Username is required').isLength({min: 5}),
+  check('Username', 'Username contains non alphanumeric characters - not allowed').isAlphanumeric(),
+  check('Password', 'Password is required').not().isEmpty(),
+  check('Email', 'Email does not appear to be valid').isEmail()
+],
+(req, res) => {
+  var errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+  var hashedPassword = Users.hashPassword(req.body.Password);
   Users.findOne({ Username : req.body.Username })
   .then((user) => {
     if (user) {
@@ -90,7 +109,7 @@ app.post('/users', passport.authenticate('jwt', {session : false}), (req, res) =
     } else {
       Users.create({
         Username: req.body.Username,
-        Password: req.body.Password,
+        Password: hashedPassword,
         Email: req.body.Email,
         Birthday: req.body.Birthday
       })
@@ -100,7 +119,7 @@ app.post('/users', passport.authenticate('jwt', {session : false}), (req, res) =
         res.status(500).send("Error: " + error);
       })
     }
-  }).catch(function(error) {
+  }).catch((error) => {
     console.error(error);
     res.status(500).send("Error: " + error);
   });
@@ -108,13 +127,23 @@ app.post('/users', passport.authenticate('jwt', {session : false}), (req, res) =
 
 // Update the user's information
 
-app.put('/users/:Username', passport.authenticate('jwt', {session : false}), (req, res) => {
+app.put('/users/:Username', [
+  check('Username', 'Username is required').isLength({min: 5}),
+  check('Username', 'Username contains non alphanumeric characters - not allowed').isAlphanumeric(),
+  check('Password', 'Password is required').not().isEmpty(),
+  check('Email', 'Email does not appear to be valid').isEmail()
+], 
+(req, res) => {
+  var errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+  var hashedPassword = Users.hashPassword(req.body.Password);
   Users.update(
-    { Username : req.params.Username }, 
-    {
+    { Username : req.params.Username }, {
       $set : {
         Username : req.body.Username,
-        Password : req.body.Password,
+        Password : hashedPassword,
         Email : req.body.Email,
         Birthday : req.body.Birthday
       }
@@ -183,8 +212,9 @@ app.delete('/users/:Username', passport.authenticate('jwt', {session : false}),
   });
 });
 
-app.use(express.static('public'));
+// Listen for requests on port 3000
 
-// Listen for requests on port 8080
-
-app.listen(8080);
+var port = process.env.PORT || 3000;
+app.listen(port, "0.0.0.0", function() {
+console.log("Listening on Port 3000");
+});
