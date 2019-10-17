@@ -12,7 +12,8 @@ const { check, validationResult } = require('express-validator');
 const passport = require('passport');
 require('./passport');  
 
-mongoose.connect('mongodb://localhost:27017/myFlixDB', { useNewUrlParser: true, useUnifiedTopology: true })
+//mongoose.connect('mongodb://localhost:27017/myFlixDB', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb+srv://jimmyyhsu:Intricate8!@myflixdb-ir8u6.azure.mongodb.net/myFlixDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Middleware functions
 app.use(express.static('public'));
