@@ -32,7 +32,7 @@ app.use(function (err, req, res, next) {
   next();
 });
 
-// Homepage for myFlix
+// Homepage
 
 app.get('/', (req, res) => {
   res.send("Welcome to myFlix!")
