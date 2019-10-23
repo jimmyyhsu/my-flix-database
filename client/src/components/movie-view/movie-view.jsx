@@ -10,25 +10,27 @@ export class MovieView extends React.Component {
         const { movie, onClick } = this.props;
         if (!movie) return null;
         return (
-            <div className="movie-view">
+            <div className="container-fluid align-items-center ml-3 mt-2">
                 <div className="movie-title">
-                    <div className="label">Title</div>
-                    <div className="value">{movie.Title}</div>
+                    <h1 className="value">{movie.Title}</h1>
                 </div>
+                <img
+                    className="movie-poster"
+                    src="http://via.placeholder.com/640x360"
+                />
                 <div className="movie-description">
-                    <div className="label">Description</div>
                     <div className="value">{movie.Description}</div>
                 </div>
-                <img className="movie-poster" src={movie.ImagePath} />
                 <div className="movie-genre">
-                    <div className="label">Genre</div>
-                    <div className="value">{movie.Genre.Name}</div>
+                    <div className="value">Genre: {movie.Genre.Name}</div>
                 </div>
                 <div className="movie-director">
-                    <div className="label">Director</div>
-                    <div className="value">{movie.Director.Name}</div>
+                    <div className="value">Director: {movie.Director.Name}</div>
                 </div>
-                <button className="back-to-list-btn" onClick={() => onClick()}>
+                <button
+                    className="btn btn-outline-primary text-uppercase mt-2"
+                    onClick={() => onClick()}
+                >
                     Back to Movies
         </button>
             </div>
