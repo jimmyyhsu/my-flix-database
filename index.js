@@ -60,7 +60,7 @@ app.get(
 // Gets the data about a single movie, by title
 
 app.get(
-  "/movies/:Title",
+  "/movies/:movieId",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Movies.findOne({ Title: req.params.Title })
