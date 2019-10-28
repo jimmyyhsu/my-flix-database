@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import Button from "react-bootstrap/Button";
 
 export class MovieView extends React.Component {
   constructor() {
@@ -7,7 +9,7 @@ export class MovieView extends React.Component {
   }
 
   render() {
-    const { movie, onClick } = this.props;
+    const { movie } = this.props;
     if (!movie) return null;
     return (
       <div
@@ -25,17 +27,22 @@ export class MovieView extends React.Component {
           <div className="mt-1 mb-3">{movie.Description}</div>
         </div>
         <div className="movie-genre">
-          <div className="value">Genre: {movie.Genre.Name}</div>
+          Genre:
+          <Link to={`/genres/${movie.Genre.Name}`}>
+            <Button variant="link">{movie.Genre.Name}</Button>
+          </Link>
         </div>
         <div className="movie-director">
-          <div className="value">Director: {movie.Director.Name}</div>
+          Director:
+          <Link to={`/directors/${movie.Director.Name}`}>
+            <Button variant="link">{movie.Director.Name}</Button>
+          </Link>
         </div>
-        <button
-          className="btn btn-outline-primary text-uppercase mt-2"
-          onClick={() => onClick()}
-        >
-          Back to Movies
-        </button>
+        <Link to={`/`}>
+          <Button className="mt-3" variant="primary">
+            Back to Movies
+          </Button>
+        </Link>
       </div>
     );
   }
