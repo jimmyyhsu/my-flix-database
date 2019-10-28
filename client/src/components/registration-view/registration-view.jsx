@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import "./registration-view.scss";
+import axios from "axios";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import logo from "../../images/logo2.png";
 
 export function RegistrationView(props) {
   const [username, createUsername] = useState("");
@@ -8,16 +11,28 @@ export function RegistrationView(props) {
   const [email, createEmail] = useState("");
   const [birthday, createBirthday] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleRegister = (e) => {
     e.preventDefault();
-    console.log(username, password, email, birthday);
-    /* Send a request to the server for authentication */
-    /* then call props.onLoggedIn(username) */
-    props.onLoggedIn(username);
+    axios
+      .post("https://myflixdb-api.herokuapp.com/login", {
+        Username: username,
+        Password: password,
+        Email: email,
+        Birthday: birthday
+      })
+      .then((response) => {
+        const data = response.data;
+        console.log(data);
+        window.open("/", "_self"); // the second argument '_self' is necessary so that the page will open in the current tab
+      })
+      .catch((e) => {
+        console.log("error registering the user");
+      });
   };
 
   return (
-    <Form>
+    <Form className="registration-form">
+      <img src={logo} alt="logo" style={{ width: "300px" }} />
       <Form.Group controlId="formBasicUsername">
         <Form.Control
           type="text"
@@ -50,7 +65,7 @@ export function RegistrationView(props) {
           onChange={(e) => createBirthday(e.target.value)}
         />
       </Form.Group>
-      <Button variant="primary" type="submit" onClick={handleSubmit}>
+      <Button variant="primary" type="submit" onClick={handleRegister}>
         Register
       </Button>
     </Form>
