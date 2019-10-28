@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import "./login-view.scss";
 import axios from "axios";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
+import { Button, Form } from "react-bootstrap";
+import logo from "../../images/logo2.png";
+import { Link } from "react-router-dom";
 
 export function LoginView(props) {
   const [username, setUsername] = useState("");
@@ -25,25 +27,32 @@ export function LoginView(props) {
   };
 
   return (
-    <Form>
+    <Form className="login-form">
+      <img src={logo} alt="logo" style={{ width: "300px" }} />
       <Form.Group controlId="formBasicUsername">
+        <Form.Label>Username</Form.Label>
         <Form.Control
-          type="text"
+          type="username"
           placeholder="Enter username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
       </Form.Group>
       <Form.Group controlId="formBasicPassword">
+        <Form.Label>Password</Form.Label>
         <Form.Control
-          type="text"
+          type="password"
           placeholder="Enter Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </Form.Group>
-      <Button variant="primary" type="submit" onClick={handleSubmit}>
-        Submit
+      <Button
+        variant="btn-lg btn-dark btn-block"
+        type="submit"
+        onClick={handleSubmit}
+      >
+        Login
       </Button>
     </Form>
   );
